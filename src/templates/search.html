@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h3>Search (search.py)</h3>
+  <div class="input-group mb-3" style="max-width:820px">
+    <input id="searchQ" type="text" class="form-control" placeholder="Search...">
+    <select id="searchType" class="form-select" style="width:150px">
+      <option value="title">Title</option>
+      <option value="author">Author</option>
+      <option value="isbn">ISBN</option>
+    </select>
+    <button id="searchBtn" class="btn btn-outline-primary">Go</button>
+  </div>
+  <div id="searchResults" class="list-group"></div>
+{% block scripts %}
+  <script src="/static/search.js"></script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Members (member.py)</h3>
+    <div>
+      <input id="memberId" data-quick="add" class="form-control d-inline-block me-2" placeholder="Member ID" style="width:160px">
+      <input id="memberName" class="form-control d-inline-block me-2" placeholder="Name" style="width:260px">
+      <button id="addMemberBtn" class="btn btn-success">Add Member</button>
+    </div>
+  </div>
+  <div id="membersList" class="list-group"></div>
+{% block scripts %}
+  <script src="/static/members.js"></script>
+{% endblock %}
+{% endblock %}
