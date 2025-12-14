@@ -1,0 +1,23 @@
+:root{
+	--brand:#0d6efd;
+	--muted:#6c757d;
+}
+html,body{height:100%;}
+body {
+	background: #f8f9fa;
+	font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+	color: #212529;
+}
+.list-group-item { cursor: pointer; }
+.book-title { font-weight: 600; }
+.btn:focus, .form-control:focus{ box-shadow: 0 0 0 0.15rem rgba(13,110,253,0.25); outline: none; }
+.visually-hidden-focusable:focus{ position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+
+/* responsive tweaks */
+@media (max-width: 768px){
+	.book-title{ font-size: .95rem }
+}
+
+/* better contrast for navbar links */
+.navbar-brand, .nav-link{ font-weight:600 }
+

@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h3>Librarian (auth_system.py)</h3>
+  <div class="mb-3" style="max-width:420px">
+    <input id="user" class="form-control mb-2" placeholder="username">
+    <input id="pass" class="form-control mb-2" placeholder="password" type="password">
+    <div class="d-flex">
+      <button id="loginBtn" class="btn btn-primary me-2">Login</button>
+      <button id="registerBtn" class="btn btn-outline-secondary">Register</button>
+    </div>
+    <div id="loginStatus" class="mt-2"></div>
+  </div>
+{% block scripts %}
+  <script src="/static/auth.js"></script>
+{% endblock %}
+{% endblock %}
