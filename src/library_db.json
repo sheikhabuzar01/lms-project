@@ -1,0 +1,168 @@
+{
+  "library": {
+    "books": {
+      "1": {
+        "isbn": "1",
+        "title": "naruto",
+        "author": "tom cruiz",
+        "copies": 62
+      },
+      "2": {
+        "isbn": "2",
+        "title": "one piece",
+        "author": "Oda",
+        "copies": 52
+      },
+      "3": {
+        "isbn": "3",
+        "title": "bleach",
+        "author": "jon",
+        "copies": 23
+      },
+      "4": {
+        "isbn": "4",
+        "title": "Game of thrones",
+        "author": "martin",
+        "copies": 4
+      }
+    },
+    "members": {
+      "1": {
+        "member_id": "1",
+        "name": "admin",
+        "borrowed_books": [
+          "4"
+        ]
+      },
+      "2": {
+        "member_id": "2",
+        "name": "Oda",
+        "borrowed_books": [
+          "2"
+        ]
+      },
+      "4": {
+        "member_id": "4",
+        "name": "Snow",
+        "borrowed_books": [
+          "2",
+          "1"
+        ]
+      }
+    },
+    "loans": {
+      "1": {
+        "loan_id": "1",
+        "member_id": "2",
+        "isbn": "2",
+        "issue_date": "2025-12-14",
+        "due_date": "2025-12-28",
+        "returned": false
+      },
+      "2": {
+        "loan_id": "2",
+        "member_id": "1",
+        "isbn": "2",
+        "issue_date": "2025-12-14",
+        "due_date": "2025-12-28",
+        "returned": false
+      },
+      "3": {
+        "loan_id": "3",
+        "member_id": "1",
+        "isbn": "2",
+        "issue_date": "2025-12-14",
+        "due_date": "2025-12-28",
+        "returned": false
+      },
+      "4": {
+        "loan_id": "4",
+        "member_id": "4",
+        "isbn": "2",
+        "issue_date": "2025-12-14",
+        "due_date": "2025-12-28",
+        "returned": true
+      },
+      "5": {
+        "loan_id": "5",
+        "member_id": "4",
+        "isbn": "2",
+        "issue_date": "2025-12-14",
+        "due_date": "2025-12-28",
+        "returned": false
+      },
+      "6": {
+        "loan_id": "6",
+        "member_id": "4",
+        "isbn": "2",
+        "issue_date": "2025-12-14",
+        "due_date": "2025-12-28",
+        "returned": false
+      },
+      "7": {
+        "loan_id": "7",
+        "member_id": "4",
+        "isbn": "2",
+        "issue_date": "2025-12-14",
+        "due_date": "2025-12-28",
+        "returned": false
+      },
+      "8": {
+        "loan_id": "8",
+        "member_id": "4",
+        "isbn": "1",
+        "issue_date": "2025-12-14",
+        "due_date": "2025-12-28",
+        "returned": false
+      },
+      "9": {
+        "loan_id": "9",
+        "member_id": "4",
+        "isbn": "1",
+        "issue_date": "2025-12-14",
+        "due_date": "2025-12-28",
+        "returned": false
+      },
+      "10": {
+        "loan_id": "10",
+        "member_id": "1",
+        "isbn": "2",
+        "issue_date": "2025-12-14",
+        "due_date": "2025-12-28",
+        "returned": false
+      },
+      "11": {
+        "loan_id": "11",
+        "member_id": "1",
+        "isbn": "2",
+        "issue_date": "2025-12-14",
+        "due_date": "2025-12-28",
+        "returned": false
+      },
+      "12": {
+        "loan_id": "12",
+        "member_id": "1",
+        "isbn": "4",
+        "issue_date": "2025-12-14",
+        "due_date": "2025-12-28",
+        "returned": false
+      },
+      "13": {
+        "loan_id": "13",
+        "member_id": "1",
+        "isbn": "4",
+        "issue_date": "2025-12-14",
+        "due_date": "2025-12-28",
+        "returned": false
+      }
+    },
+    "next_loan_id": 14
+  },
+  "auth": {
+    "users": {
+      "admin": "admin",
+      "ali": "ali123",
+      "tom": "123"
+    }
+  }
+}
