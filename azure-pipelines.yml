@@ -1,19 +1,71 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- main
+  branches:
+    include:
+      - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+stages:
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+  # STAGE 1: BUILD
+  - stage: Build
+    displayName: 'Build Docker Image'
+    jobs:
+      - job: BuildImage
+        steps:
+          - script: |
+              docker build -t lms-project:$(Build.BuildId) .
+            displayName: 'Build Docker Image'
+
+  # STAGE 2: IMAGE TEST
+  - stage: ImageTest
+    displayName: 'Test Image Runs'
+    dependsOn: Build
+    jobs:
+      - job: TestImage
+        steps:
+          - script: |
+              docker build -t lms-project:$(Build.BuildId) .
+              docker run -d -p 5000:5000 --name test-container lms-project:$(Build.BuildId)
+              sleep 10
+              if [ $(docker inspect -f '{{.State.Running}}' test-container) = "true" ]; then
+                echo "Container is running successfully"
+                docker stop test-container
+                docker rm test-container
+              else
+                echo "Container failed to start"
+                docker rm test-container
+                exit 1
+              fi
+            displayName: 'Check Container Starts'
+
+  # STAGE 3: UNIT TEST
+  - stage: UnitTest
+    displayName: 'Run Unit Tests Inside Container'
+    dependsOn: ImageTest
+    jobs:
+      - job: RunTests
+        steps:
+          - script: |
+              docker build -t lms-project:$(Build.BuildId) .
+              docker run --rm lms-project:$(Build.BuildId) python -m pytest tests/ -v
+            displayName: 'Run Pytest Inside Container'
+
+  # STAGE 4: PUSH TO ACR
+  - stage: Push
+    displayName: 'Push Image to ACR'
+    dependsOn: UnitTest
+    jobs:
+      - job: PushImage
+        steps:
+          - task: Docker@2
+            displayName: 'Login and Push to ACR'
+            inputs:
+              command: 'buildAndPush'
+              repository: 'lms-project'
+              dockerfile: '**/Dockerfile'
+              containerRegistry: 'corvitprojectacr-connection'
+              tags: |
+                $(Build.BuildId)
+                latest
