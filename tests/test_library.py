@@ -5,7 +5,6 @@ Provides basic tests for the core functionality of the system.
 """
 
 import unittest
-
 from src.book import Book
 from src.member import Member
 from src.library import Library
@@ -13,7 +12,6 @@ from src.issue_return import issue_book, return_book
 from src.search import search_by_title
 from src.auth_system import AuthSystem
 import src.storage as storage
-from auth_system import AuthSystem
 import tempfile
 import os
 
