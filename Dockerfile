@@ -8,6 +8,8 @@ RUN pip install -r requirements.txt
 
 COPY src/ ./src/
 
+COPY tests/ ./tests/
+
 EXPOSE 5000
 
 CMD ["python","src/webapp.py"]
