@@ -49,7 +49,10 @@ stages:
         steps:
           - script: |
               docker build -t lms-project:$(Build.BuildId) .
-              docker run --rm lms-project:$(Build.BuildId) python -m pytest tests/ -v
+              docker run --rm \
+                -e PYTHONPATH=/app/src \
+                lms-project:$(Build.BuildId) \
+                python -m pytest tests/ -v
             displayName: 'Run Pytest Inside Container'
 
   # STAGE 4: PUSH TO ACR
