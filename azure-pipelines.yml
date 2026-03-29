@@ -1,74 +1,168 @@
 trigger:
   branches:
     include:
-      - main
+      - 
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: "ubuntu-latest"
+
+variables:
+  acrLoginServer: "corvitrojectacr.azurecr.io"
+  imageName: "lms-project"
+  dockerRegistryConnection: "corvitprojectacr-conn2"
+  azureRMConnection: "azure-rm-connection"
+  aksClusterName: "lms-aks-cluster"
+  aksResourceGroup: "VisualStudioOnline-B7676031D19941C29CB021209999B63D"
+  k8sNamespace: "default"
 
 stages:
-
-  # STAGE 1: BUILD
+  # ─────────────────────────────
+  # STAGE 1 — Build Docker Image
+  # ─────────────────────────────
   - stage: Build
-    displayName: 'Build Docker Image'
+    displayName: "Build Docker Image"
     jobs:
-      - job: BuildImage
+      - job: Build
         steps:
-          - script: |
-              docker build -t lms-project:$(Build.BuildId) .
-            displayName: 'Build Docker Image'
+          - checkout: self
 
-  # STAGE 2: IMAGE TEST
-  - stage: ImageTest
-    displayName: 'Test Image Runs'
-    dependsOn: Build
-    jobs:
-      - job: TestImage
-        steps:
-          - script: |
-              docker build -t lms-project:$(Build.BuildId) .
-              docker run -d -p 5000:5000 --name test-container lms-project:$(Build.BuildId)
-              sleep 10
-              if [ $(docker inspect -f '{{.State.Running}}' test-container) = "true" ]; then
-                echo "Container is running successfully"
-                docker stop test-container
-                docker rm test-container
-              else
-                echo "Container failed to start"
-                docker rm test-container
-                exit 1
-              fi
-            displayName: 'Check Container Starts'
-
-  # STAGE 3: UNIT TEST
-  - stage: UnitTest
-    displayName: 'Run Unit Tests Inside Container'
-    dependsOn: ImageTest
-    jobs:
-      - job: RunTests
-        steps:
-          - script: |
-              docker build -t lms-project:$(Build.BuildId) .
-              docker run --rm \
-                -e PYTHONPATH=/app/src \
-                lms-project:$(Build.BuildId) \
-                python -m pytest tests/ -v
-            displayName: 'Run Pytest Inside Container'
-
-  # STAGE 4: PUSH TO ACR
-  - stage: Push
-    displayName: 'Push Image to ACR'
-    dependsOn: UnitTest
-    jobs:
-      - job: PushImage
-        steps:
           - task: Docker@2
-            displayName: 'Login and Push to ACR'
+            displayName: "Build image"
             inputs:
-              command: 'buildAndPush'
-              repository: 'lms-project'
-              dockerfile: '**/Dockerfile'
-              containerRegistry: 'corvitprojectacr-conn2'
+              command: "build"
+              containerRegistry: "$(dockerRegistryConnection)"
+              repository: "$(imageName)"
+              dockerfile: "**/Dockerfile"
               tags: |
                 $(Build.BuildId)
                 latest
+
+  # ─────────────────────────────
+  # STAGE 2 — Container Test
+  # ─────────────────────────────
+  - stage: Test
+    displayName: "Container Test"
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - job: Test
+        steps:
+          - checkout: self
+
+          - task: Docker@2
+            displayName: "Build test image"
+            inputs:
+              command: "build"
+              repository: "$(imageName)"
+              dockerfile: "**/Dockerfile"
+              tags: "test"
+
+          - script: |
+              docker run -d --name test-container -p 5000:5000 $(imageName):test
+              sleep 10
+
+              docker ps | grep test-container
+              if [ $? -ne 0 ]; then
+                echo "Container failed"
+                docker logs test-container
+                exit 1
+              fi
+
+              docker stop test-container && docker rm test-container
+            displayName: "Check container is running"
+
+  # ─────────────────────────────
+  # STAGE 3 — Unit Tests
+  # ─────────────────────────────
+  - stage: UnitTest
+    displayName: "Run pytest"
+    dependsOn: Test
+    condition: succeeded()
+    jobs:
+      - job: UnitTest
+        steps:
+          - checkout: self
+
+          - task: Docker@2
+            displayName: "Build test image"
+            inputs:
+              command: "build"
+              repository: "$(imageName)"
+              dockerfile: "**/Dockerfile"
+              tags: "test"
+
+          - script: |
+              docker run --rm \
+                -e PYTHONPATH=/app:/app/src \
+                $(imageName):test \
+                pytest tests/ -v
+            displayName: "Run pytest"
+
+  # ─────────────────────────────
+  # STAGE 4 — Push to ACR
+  # ─────────────────────────────
+  - stage: Push
+    displayName: "Push to ACR"
+    dependsOn: UnitTest
+    condition: succeeded()
+    jobs:
+      - job: Push
+        steps:
+          - checkout: self
+
+          - task: Docker@2
+            displayName: "Build and push image"
+            inputs:
+              command: "buildAndPush"
+              containerRegistry: "$(dockerRegistryConnection)"
+              repository: "$(imageName)"
+              dockerfile: "**/Dockerfile"
+              tags: |
+                $(Build.BuildId)
+                latest
+
+  # ─────────────────────────────
+  # STAGE 5 — Deploy to AKS
+  # ─────────────────────────────
+  - stage: Deploy
+    displayName: "Deploy to AKS"
+    dependsOn: Push
+    condition: succeeded()
+    jobs:
+      - job: Deploy
+        steps:
+          - checkout: self
+
+          # Connect to AKS
+          - task: AzureCLI@2
+            displayName: "Connect to AKS"
+            inputs:
+              azureSubscription: "$(azureRMConnection)"
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              inlineScript: |
+                az aks get-credentials \
+                  --resource-group $(aksResourceGroup) \
+                  --name $(aksClusterName) \
+                  --overwrite-existing
+
+                kubectl get nodes
+
+          # Deploy app
+          - task: AzureCLI@2
+            displayName: "Deploy app to AKS"
+            inputs:
+              azureSubscription: "$(azureRMConnection)"
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              inlineScript: |
+                kubectl create namespace $(k8sNamespace) --dry-run=client -o yaml | kubectl apply -f -
+
+                kubectl apply -f k8s/deployment.yaml -n $(k8sNamespace)
+                kubectl apply -f k8s/service.yaml -n $(k8sNamespace)
+
+                kubectl rollout restart deployment/lms-deployment -n $(k8sNamespace)
+                kubectl rollout status deployment/lms-deployment -n $(k8sNamespace) --timeout=300s
+
+                echo "Service info:"
+                kubectl get svc -n $(k8sNamespace)
