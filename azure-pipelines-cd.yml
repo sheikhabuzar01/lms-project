@@ -6,8 +6,8 @@ stages:
       - job: DeployToAKS
         displayName: 'Apply Kubernetes Manifests'
         steps:
-          - checkout: self        ← add this line
-          
+          - checkout: self
+
           - task: KubernetesManifest@1
             displayName: 'Deploy to AKS'
             inputs:
