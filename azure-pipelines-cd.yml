@@ -1,0 +1,32 @@
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: CI
+      source: 'sheikhabuzar01.lms-project'
+      trigger:
+        branches:
+          include:
+            - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+
+  - stage: Deploy
+    displayName: 'Deploy to AKS'
+    jobs:
+      - job: DeployToAKS
+        displayName: 'Apply Kubernetes Manifests'
+        steps:
+          - task: KubernetesManifest@1
+            displayName: 'Deploy to AKS'
+            inputs:
+              action: 'deploy'
+              connectionType: 'kubernetesServiceConnection'
+              kubernetesServiceConnection: 'corvit-aks-connection'
+              namespace: 'default'
+              manifests: |
+                k8s/deployment.yaml
+                k8s/service.yaml
