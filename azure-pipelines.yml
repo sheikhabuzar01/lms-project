@@ -68,7 +68,7 @@ stages:
               command: 'buildAndPush'
               repository: 'lms-project'
               dockerfile: '**/Dockerfile'
-              containerRegistry: 'corvitprojectacr-connection'
+              containerRegistry: 'corvitprojectacr-conn2'
               tags: |
                 $(Build.BuildId)
                 latest
