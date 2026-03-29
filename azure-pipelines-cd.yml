@@ -32,6 +32,12 @@ stages:
                 az aks get-credentials --resource-group VisualStudioOnline-B7676031D19941C29CB021209999B63D --name corvit-aks-cluster --overwrite-existing
 
           - script: |
+              echo "Current directory:"
+              pwd
+              echo "Files in repo:"
+              ls -la
+              echo "K8s folder:"
+              ls -la k8s/
               kubectl apply -f k8s/deployment.yaml
               kubectl apply -f k8s/service.yaml
             displayName: 'Deploy to AKS'
