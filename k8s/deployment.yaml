@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms-deployment
+  labels:
+    app: lms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lms
+  template:
+    metadata:
+      labels:
+        app: lms
+    spec:
+      containers:
+        - name: lms-container
+          image: corvitprojectacr.azurecr.io/lms-project:latest
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
